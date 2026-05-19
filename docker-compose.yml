@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: sigutcuts_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sigutcuts}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigutcuts_dev_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-sigutcuts}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigutcuts"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigutcuts_backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://sigutcuts:sigutcuts_dev_2024@db:5432/sigutcuts}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production_sigutcuts_2024}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-1440}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:5173}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sigutcuts_frontend
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
