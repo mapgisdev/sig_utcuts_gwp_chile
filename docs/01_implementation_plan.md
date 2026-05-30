@@ -268,60 +268,60 @@ Todos los datos marcados como `is_sample = true` o `data_confidence = "demo"`.
 - Lectura de insumos
 - Generación de este plan
 
-### Fase 2 — Scaffolding
+### Fase 2 ✅ — Scaffolding
 - Estructura del monorepo
 - Docker Compose
 - `.env.example`
 - Dockerfiles
 - README_DEV.md
 
-### Fase 3 — Base de Datos
+### Fase 3 ✅ — Base de Datos
 - Modelos SQLAlchemy + GeoAlchemy2
 - Migraciones Alembic
 - Script de inicialización de schemas
 - Seed data con geometrías simplificadas
 
-### Fase 4 — Backend API
+### Fase 4 ✅ — Backend API
 - Autenticación JWT
 - CRUD de todas las entidades
 - Endpoints de dashboard
 - Endpoints geoespaciales (GeoJSON)
 - Servicios de priorización y MRV
 
-### Fase 5 — Frontend Base
+### Fase 5 ✅ — Frontend Base
 - Layout principal con sidebar
 - React Router
 - Zustand stores
 - Componentes base (tarjetas, tablas, formularios)
 - Todas las pantallas
 
-### Fase 6 — SIG / Mapa
+### Fase 6 ✅ — SIG / Mapa
 - MapLibre integrado
 - Capas GeoJSON desde backend
 - Coropletas por prioridad/inversión
 - Click → ficha territorial
 - Control de capas y leyenda
 
-### Fase 7 — Priorización
+### Fase 7 ✅ — Priorización
 - Cálculo multicriterio con pesos configurables
 - Normalización 0–100
 - Clasificación 5 niveles
 - Escenarios guardables
 - Explicabilidad del puntaje
 
-### Fase 8 — MRV
+### Fase 8 ✅ — MRV
 - Indicadores por categoría
 - Observaciones estimado/verificado
 - Evidencia asociada
 - Estados de verificación
 - Dashboard de avance
 
-### Fase 9 — Testing
+### Fase 9 ✅ — Testing
 - Backend: health, auth, CRUD, dashboard, priorización, GeoJSON
 - Frontend: render básico, navegación, dashboard
 - Integración: seed data, docker compose
 
-### Fase 10 — Documentación
+### Fase 10 ✅ — Documentación
 - README.md
 - README_DEV.md
 - docs/ARCHITECTURE.md
@@ -366,16 +366,16 @@ Todos los datos marcados como `is_sample = true` o `data_confidence = "demo"`.
 
 ## 13. Criterios de Aceptación
 
-- [ ] `docker compose up --build` levanta la aplicación
-- [ ] Backend responde en `GET /health`
-- [ ] Documentación API abre en `/docs`
-- [ ] Frontend abre correctamente en `localhost:5173`
-- [ ] Mapa renderiza geometrías de ejemplo
-- [ ] Dashboard muestra KPIs con datos demo
-- [ ] Mecanismos se consultan en catálogo
-- [ ] Se puede registrar una inversión demo
-- [ ] Se calcula ranking territorial
-- [ ] Se registra un indicador MRV
-- [ ] Se visualizan brechas de información
-- [ ] Tests mínimos pasan
-- [ ] Documentación completa
+- [x] `docker compose up --build` levanta la aplicación
+- [x] Backend responde en `GET /health`
+- [x] Documentación API abre en `/docs`
+- [x] Frontend abre correctamente en `localhost:5173`
+- [x] Mapa renderiza geometrías de ejemplo
+- [x] Dashboard muestra KPIs con datos demo
+- [x] Mecanismos se consultan en catálogo
+- [x] Se puede registrar una inversión demo
+- [x] Se calcula ranking territorial
+- [x] Se registra un indicador MRV
+- [x] Se visualizan brechas de información
+- [x] Tests mínimos pasan
+- [x] Documentación completa
