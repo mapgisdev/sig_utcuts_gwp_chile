@@ -53,8 +53,40 @@ export default function Login() {
             Iniciar Sesión
           </button>
         </form>
-        <div className="mt-6 text-center">
-          <p className="text-xs text-ocean-500">Usuarios demo: admin/admin123, editor/editor123, viewer/viewer123</p>
+        <div className="mt-6 pt-6 border-t border-ocean-800/80">
+          <p className="text-xs text-ocean-400 font-medium mb-3 text-center">Cargar Usuario Demo</p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('admin')
+                setPassword('admin123')
+              }}
+              className="py-2 px-1 bg-ocean-800/60 hover:bg-ocean-700 border border-ocean-700 text-xs text-ocean-200 hover:text-white rounded-lg transition-all font-medium hover:border-forest-500 text-center cursor-pointer"
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('editor')
+                setPassword('editor123')
+              }}
+              className="py-2 px-1 bg-ocean-800/60 hover:bg-ocean-700 border border-ocean-700 text-xs text-ocean-200 hover:text-white rounded-lg transition-all font-medium hover:border-forest-500 text-center cursor-pointer"
+            >
+              Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setUsername('viewer')
+                setPassword('viewer123')
+              }}
+              className="py-2 px-1 bg-ocean-800/60 hover:bg-ocean-700 border border-ocean-700 text-xs text-ocean-200 hover:text-white rounded-lg transition-all font-medium hover:border-forest-500 text-center cursor-pointer"
+            >
+              Visor
+            </button>
+          </div>
         </div>
       </div>
     </div>

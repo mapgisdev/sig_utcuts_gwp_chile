@@ -1,5 +1,6 @@
-import { Outlet, NavLink } from 'react-router-dom'
-import { useAppStore } from '../store/store'
+import { useEffect } from 'react'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useAppStore, useAuthStore } from '../store/store'
 
 const navItems = [
   { path: '/', label: 'Inicio', icon: '📊' },
@@ -15,6 +16,14 @@ const navItems = [
 
 export default function Layout() {
   const { sidebarOpen, toggleSidebar } = useAppStore()
+  const { token, logout } = useAuthStore()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login')
+    }
+  }, [token, navigate])
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -55,6 +64,15 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
+        {/* Cerrar Sesión */}
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 px-3 py-2.5 mx-2 mb-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200"
+        >
+          <span className="text-lg">🚪</span>
+          {sidebarOpen && <span>Cerrar Sesión</span>}
+        </button>
 
         {/* Toggle */}
         <button
