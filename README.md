@@ -116,14 +116,16 @@ Usa los botones de carga rápida de la pantalla de inicio de sesión o ingresa l
 
 ---
 
-### Documentación Detallada del Sistema
+### Documentación del Sistema (Disponible solo en Local)
 
-- **Manual de Operación:** [Manual de Usuario y Guía de Operación](docs/MANUAL_USUARIO.md)
-- **Tutorial Visual de la UI:** [Guía Visual de Interfaz Gráfica](docs/04_ui_tutorial.md)
-- **Estructura Geoespacial:** [Guía de Datos Espaciales y ETL](docs/02_spatial_data_guide.md)
-- **Modelo de Datos:** [Diccionario de Entidades y Atributos](docs/DATA_MODEL.md)
-- **Plan de Arquitectura:** [Arquitectura de Software y Pipeline](docs/ARCHITECTURE.md)
-- **Guía de Desarrollo Backend:** [README del Desarrollador](README_DEV.md)
+La documentación técnica y manuales de operación detallados se encuentran guardados localmente en la carpeta `/docs/` del workspace local para proteger la privacidad del diseño y evitar la exposición pública de capturas y datos del sistema:
+
+- **Manual de Operación:** `docs/MANUAL_USUARIO.md`
+- **Tutorial Visual de la UI:** `docs/04_ui_tutorial.md`
+- **Estructura Geoespacial:** `docs/02_spatial_data_guide.md`
+- **Modelo de Datos:** `docs/DATA_MODEL.md`
+- **Plan de Arquitectura:** `docs/ARCHITECTURE.md`
+- **Guía de Desarrollo Backend:** [README_DEV.md](README_DEV.md) (Disponible en el repositorio)
 
 ---
 
