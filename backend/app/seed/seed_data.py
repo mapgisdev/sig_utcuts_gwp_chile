@@ -12,6 +12,8 @@ from app.models.mrv import MRVIndicator, MRVObservation
 from app.models.data_quality import DataQualityFlag
 from app.models.prioritization import PrioritizationScore
 from app.models.layer import DataSource, Layer
+from app.models.sirsd_programa import SirsdPrograma
+from app.models.plantacion_forestal_2022 import PlantacionForestal2022
 from app.core.security import get_password_hash
 
 
@@ -289,14 +291,20 @@ def seed_data_quality(db: Session):
 
 
 def seed_data_sources(db: Session):
+    # Clear old sample data to ensure the database updates with new layer definitions
+    db.query(Layer).filter(Layer.is_sample == True).delete()
+    db.query(DataSource).filter(DataSource.is_sample == True).delete()
+    db.commit()
+
     if db.query(DataSource).first():
         return
     sources = [
         ("IDE Chile", "IDE Chile", "territorial", "https://www.ide.cl", "open"),
-        ("CONAF SIT", "CONAF", "forest", "https://sit.conaf.cl", "open"),
-        ("ARClim", "MMA / CR2", "climate", "https://arclim.mma.gob.cl", "open"),
-        ("MapBiomas Chile", "MapBiomas", "land_cover", "https://chile.mapbiomas.org", "open"),
-        ("SIMBIO", "MMA", "biodiversity", "https://simbio.mma.gob.cl", "restricted"),
+        ("SIMBIO", "MMA", "biodiversity", "https://simbio.mma.gob.cl", "open"),
+        ("Subpesca", "Subsecretaría de Pesca y Acuicultura", "coastal", "https://www.subpesca.cl", "open"),
+        ("Ministerio del Medio Ambiente", "MMA", "biodiversity", "https://mma.gob.cl", "open"),
+        ("CIREN", "Centro de Información de Recursos Naturales", "territorial", "https://www.ciren.cl", "open"),
+        ("CONAF", "Corporación Nacional Forestal", "forestry", "https://www.conaf.cl", "open"),
     ]
     for name, inst, cat, url, acc in sources:
         db.add(DataSource(name=name, institution=inst, category=cat, url=url,
@@ -304,18 +312,205 @@ def seed_data_sources(db: Session):
     db.flush()
     ds_list = db.query(DataSource).all()
     layers = [
-        ("Regiones de Chile", "territorial", 0, "polygon"),
-        ("Comunas de Chile", "territorial", 0, "polygon"),
-        ("Catastro Bosque Nativo", "forest", 1, "polygon"),
-        ("Riesgo Climático Comunal", "climate", 2, "polygon"),
-        ("Cobertura de Suelo", "land_cover", 3, "polygon"),
-        ("Áreas Protegidas", "biodiversity", 4, "polygon"),
+        ("Regiones de Chile", "territorial", 0, "polygon", "db"),
+        ("Provincias de Chile", "territorial", 0, "polygon", "geojson"),
+        ("Comunas de Chile", "territorial", 0, "polygon", "db"),
+        ("Viveros Forestales 2025", "forestry", 5, "point", "geojson"),
+        ("Viveros SAG 2024", "territorial", 4, "point", "geojson"),
+        ("Conservación de Suelos", "territorial", 4, "polygon", "geojson"),
+        ("Programas SIRSD (WMS)", "territorial", 4, "raster", "wms"),
+        ("Áreas Protegidas", "biodiversity", 1, "polygon", "geojson"),
+        ("Sitios Prioritarios", "biodiversity", 1, "polygon", "geojson"),
+        ("Espacios ECMPO", "coastal", 2, "polygon", "geojson"),
+        ("Ecosistemas", "biodiversity", 3, "polygon", "geojson"),
     ]
-    for name, cat, dsi, gt in layers:
+    for name, cat, dsi, gt, lt in layers:
         db.add(Layer(name=name, category=cat,
                      data_source_id=ds_list[dsi].id if dsi < len(ds_list) else None,
-                     geometry_type=gt, layer_type="geojson", is_sample=True))
+                     geometry_type=gt, layer_type=lt, is_sample=True))
     db.commit()
+
+
+def seed_intervention_geometries(db: Session):
+    from app.models.intervention import InterventionGeometry, Intervention
+    import json
+    import random
+    import math
+    import os
+    
+    # Helper generators for realistic-looking natural polygons
+    def generate_irregular_polygon(center_lng, center_lat, size_deg=0.035, num_vertices=7):
+        points = []
+        # Angle increments with random jittering to make shape organic
+        angles = sorted([random.uniform(0, 2 * math.pi) for _ in range(num_vertices)])
+        for angle in angles:
+            r = size_deg * random.uniform(0.65, 1.25)
+            lng = center_lng + r * math.cos(angle)
+            lat = center_lat + r * math.sin(angle) * 1.15
+            points.append([lng, lat])
+        points.append(points[0])  # Close ring
+        return {"type": "Polygon", "coordinates": [points]}
+
+    def generate_donut_polygon(center_lng, center_lat, outer_size=0.045, inner_size=0.015):
+        outer_points = []
+        inner_points = []
+        num_vertices = 9
+        
+        # Outer boundary (CCW)
+        outer_angles = sorted([i * (2 * math.pi / num_vertices) for i in range(num_vertices)])
+        for angle in outer_angles:
+            r = outer_size * random.uniform(0.7, 1.3)
+            lng = center_lng + r * math.cos(angle)
+            lat = center_lat + r * math.sin(angle) * 1.15
+            outer_points.append([lng, lat])
+        outer_points.append(outer_points[0])
+        
+        # Inner boundary (CW)
+        inner_angles = sorted([i * (2 * math.pi / num_vertices) for i in range(num_vertices)], reverse=True)
+        for angle in inner_angles:
+            r = inner_size * random.uniform(0.8, 1.2)
+            lng = center_lng + r * math.cos(angle)
+            lat = center_lat + r * math.sin(angle) * 1.15
+            inner_points.append([lng, lat])
+        inner_points.append(inner_points[0])
+        return {"type": "Polygon", "coordinates": [outer_points, inner_points]}
+
+    def generate_firebreak_polygon(center_lng, center_lat, length_deg=0.07, width_deg=0.005):
+        # Generates a long winding line buffered into a polygon representing a firebreak
+        num_segments = 7
+        path = []
+        for i in range(num_segments + 1):
+            t = i / num_segments
+            lng = center_lng - length_deg / 2 + t * length_deg
+            lat = center_lat + 0.015 * math.sin(t * math.pi * 2.8)
+            path.append((lng, lat))
+        
+        left_side = []
+        right_side = []
+        for i in range(len(path)):
+            lng, lat = path[i]
+            left_side.append([lng, lat - width_deg / 2])
+            right_side.insert(0, [lng, lat + width_deg / 2])
+            
+        points = left_side + right_side + [left_side[0]]
+        return {"type": "Polygon", "coordinates": [points]}
+
+    # Clean previous geometries
+    db.query(InterventionGeometry).delete()
+    db.commit()
+        
+    print("  > Seeding highly realistic, irregular intervention geometries...")
+    interventions = db.query(Intervention).all()
+    for idx, i in enumerate(interventions):
+        # Find first commune linked to the project
+        commune = None
+        if i.project and i.project.territories:
+            for t in i.project.territories:
+                if t.type == "commune":
+                    commune = t
+                    break
+        
+        # Extract base coordinate
+        if commune and commune.geom_geojson:
+            try:
+                geom = json.loads(commune.geom_geojson)
+                if geom["type"] == "Polygon":
+                    coord = geom["coordinates"][0][0]
+                elif geom["type"] == "MultiPolygon":
+                    coord = geom["coordinates"][0][0][0]
+                else:
+                    coord = [-71.5, -35.0]
+            except Exception:
+                coord = [-71.5, -35.0]
+        else:
+            coord = [-71.5, -35.0]
+            
+        lng, lat = coord
+        # Add slight offset so overlapping interventions on same project aren't identical
+        offset_x = random.uniform(-0.03, 0.03)
+        offset_y = random.uniform(-0.03, 0.03)
+        lng += offset_x
+        lat += offset_y
+        
+        # Choose polygon pattern based on intervention type to simulate real GIS digitization
+        int_type = i.intervention_type
+        if int_type == "fire_prevention":
+            poly_geom = generate_firebreak_polygon(lng, lat)
+        elif int_type == "restoration":
+            poly_geom = generate_donut_polygon(lng, lat)
+        elif int_type == "native_forest_management":
+            poly_geom = generate_irregular_polygon(lng, lat, size_deg=0.035, num_vertices=8)
+        elif int_type == "conservation":
+            poly_geom = generate_irregular_polygon(lng, lat, size_deg=0.045, num_vertices=6)
+        elif int_type == "afforestation":
+            poly_geom = generate_irregular_polygon(lng, lat, size_deg=0.03, num_vertices=5)
+        else:
+            poly_geom = generate_irregular_polygon(lng, lat, size_deg=0.04, num_vertices=7)
+        
+        geom_obj = InterventionGeometry(
+            intervention_id=i.id,
+            geometry_type="polygon",
+            geom_geojson=json.dumps(poly_geom),
+            precision_level="polygon",
+            source="Digitalizado del Catastro",
+            validated=True,
+            is_sample=True
+        )
+        db.add(geom_obj)
+    db.commit()
+    print("  [OK] Organic intervention geometries seeded in DB.")
+
+    # Write static backup file to insumos/datos_geo/intervenciones_locales.json
+    try:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        datos_geo_dir = os.path.join(base_dir, "insumos", "datos_geo")
+        if os.path.exists(datos_geo_dir):
+            file_path = os.path.join(datos_geo_dir, "intervenciones_locales.json")
+            features = []
+            for geom_obj in db.query(InterventionGeometry).all():
+                try:
+                    geom = json.loads(geom_obj.geom_geojson)
+                except Exception:
+                    continue
+                inter = geom_obj.intervention
+                proj = inter.project if inter else None
+                
+                # Resolve region code
+                region_code = None
+                commune = db.query(Territory).filter(Territory.id == geom_obj.territory_id).first() if geom_obj.territory_id else None
+                if commune and commune.type == "commune" and commune.code:
+                    region_code = commune.code[:2]
+                elif inter and inter.project and inter.project.territories:
+                    for t in inter.project.territories:
+                        if t.type == "commune" and t.code:
+                            region_code = t.code[:2]
+                            break
+
+                features.append({
+                    "type": "Feature",
+                    "properties": {
+                        "id": geom_obj.id,
+                        "intervention_id": inter.id if inter else None,
+                        "project_id": inter.project_id if inter else None,
+                        "project_name": proj.name if proj else "Proyecto Desconocido",
+                        "type": inter.intervention_type if inter else "Desconocido",
+                        "ndc_component": inter.ndc_component if inter else None,
+                        "hectares_estimated": inter.hectares_estimated if inter else 0.0,
+                        "hectares_verified": inter.hectares_verified if inter else 0.0,
+                        "status": inter.status if inter else "planned",
+                        "verification_status": inter.verification_status if inter else "estimated",
+                        "precision": geom_obj.precision_level,
+                        "source": geom_obj.source,
+                        "region_code": region_code
+                    },
+                    "geometry": geom
+                })
+            fc = {"type": "FeatureCollection", "features": features}
+            with open(file_path, "w", encoding="utf-8") as f_out:
+                json.dump(fc, f_out, indent=2, ensure_ascii=False)
+            print(f"  [OK] Wrote static interventions copy to {file_path}")
+    except Exception as e:
+        print(f"  [WARN] Failed to write static interventions copy: {e}")
 
 
 def run_all_seeds(db: Session):
@@ -334,10 +529,122 @@ def run_all_seeds(db: Session):
     seed_projects_and_investments(db)
     print("  > Seeding interventions...")
     seed_interventions(db)
+    print("  > Seeding intervention geometries...")
+    seed_intervention_geometries(db)
     print("  > Seeding MRV indicators and observations...")
     seed_mrv(db)
     print("  > Seeding prioritization scores...")
     seed_prioritization(db)
     print("  > Seeding data quality flags...")
     seed_data_quality(db)
+    print("  > Seeding WFS-imported SIRSD programs...")
+    seed_sirsd_programas(db)
+    print("  > Seeding forest plantations 2022...")
+    seed_plantaciones_forestales_2022(db)
     print("  [OK] All seed data loaded successfully.")
+
+
+def seed_sirsd_programas(db: Session):
+    # Clear old sample data
+    db.query(SirsdPrograma).filter(SirsdPrograma.is_sample == True).delete()
+    db.commit()
+
+    if db.query(SirsdPrograma).first():
+        return
+
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    file_path = os.path.join(base_dir, "insumos", "datos_geo", "prog_recuperacion_suelos_degra.json")
+    if not os.path.exists(file_path):
+        print(f"  [WARN] SIRSD GeoJSON seed file not found at: {file_path}")
+        return
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            features = data.get("features", [])
+            print(f"  > Seeding {len(features)} SIRSD programas from local file into SQLite...")
+            for idx, feat in enumerate(features):
+                props = feat.get("properties", {})
+                geom = feat.get("geometry")
+                
+                db.add(SirsdPrograma(
+                    clave=props.get("clave"),
+                    sup_ha=props.get("sup_ha"),
+                    temporada=props.get("temporada"),
+                    concurso=props.get("concurso"),
+                    tip_conc=props.get("tip_conc"),
+                    codreg=props.get("codreg"),
+                    codprov=props.get("codprov"),
+                    comuna=props.get("comuna"),
+                    codcom=props.get("codcom"),
+                    sup_predio=props.get("sup_predio"),
+                    su_uso_agr=props.get("su_uso_agr"),
+                    sup_potres=props.get("sup_potres"),
+                    clase=props.get("clase"),
+                    subclase=props.get("subclase"),
+                    unidad=props.get("unidad"),
+                    agrupacion=props.get("agrupacion"),
+                    localidad=props.get("localidad"),
+                    conservado=props.get("conservado"),
+                    nom_operad=props.get("nom_operad"),
+                    bon_total=props.get("bon_total"),
+                    macrozona=props.get("macrozona"),
+                    admisible=props.get("admisible"),
+                    geom_geojson=json.dumps(geom) if geom else None,
+                    is_sample=True
+                ))
+                
+                # Commit in batches of 200 to keep it efficient
+                if (idx + 1) % 200 == 0:
+                    db.commit()
+            db.commit()
+            print("  [OK] SIRSD programas seeded in SQLite database.")
+    except Exception as e:
+        db.rollback()
+        print(f"  [WARN] Failed to seed SIRSD programs: {e}")
+
+
+def seed_plantaciones_forestales_2022(db: Session):
+    # Clear old sample data
+    db.query(PlantacionForestal2022).filter(PlantacionForestal2022.is_sample == True).delete()
+    db.commit()
+
+    if db.query(PlantacionForestal2022).first():
+        return
+
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    file_path = os.path.join(base_dir, "insumos", "datos_geo", "plantaciones_forestales_2022.json")
+    if not os.path.exists(file_path):
+        print(f"  [WARN] Plantaciones Forestales GeoJSON seed file not found at: {file_path}")
+        return
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            features = data.get("features", [])
+            print(f"  > Seeding {len(features)} Plantaciones Forestales 2022 from local file into SQLite...")
+            for idx, feat in enumerate(features):
+                props = feat.get("properties", {})
+                geom = feat.get("geometry")
+                
+                db.add(PlantacionForestal2022(
+                    objectid=props.get("objectid"),
+                    especie=props.get("especie"),
+                    especie_t=props.get("especie_t"),
+                    apl=props.get("apl"),
+                    sup_ha=props.get("sup_ha"),
+                    codreg=props.get("codreg"),
+                    geom_geojson=json.dumps(geom) if geom else None,
+                    is_sample=True
+                ))
+                
+                # Commit in batches of 1000 to keep it efficient since there are 146k features!
+                if (idx + 1) % 1000 == 0:
+                    db.commit()
+            db.commit()
+            print("  [OK] Plantaciones Forestales 2022 seeded in SQLite database.")
+    except Exception as e:
+        db.rollback()
+        print(f"  [WARN] Failed to seed Plantaciones Forestales 2022: {e}")

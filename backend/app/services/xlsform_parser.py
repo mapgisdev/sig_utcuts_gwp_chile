@@ -2,7 +2,9 @@
 import os
 import openpyxl
 
-XLSFORM_DIR = r"C:\web_antigravity\web_D_gemini\sig_utcuts_gwp_chile\insumos\formularios_xlsform"
+# Resolve path dynamically relative to this file
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+XLSFORM_DIR = os.path.join(BASE_DIR, "insumos", "formularios_xlsform")
 
 def scan_xlsforms():
     """Scans the insumos/formularios_xlsform directory for Excel files."""

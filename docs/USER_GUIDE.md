@@ -1,35 +1,31 @@
 # Guía de Usuario — SIG-UTCUTS Chile
 
-## Acceso
+Esta guía ha sido expandida y se encuentra disponible en su versión completa y detallada en español en el siguiente enlace:
 
-Abrir `http://localhost:5173` en el navegador.
+👉 **[Manual de Usuario Completo (MANUAL_USUARIO.md)](file:///d:/web_D_anctigravity/sig_utcuts_gwp_chile/docs/MANUAL_USUARIO.md)**
 
-## Módulos
+A continuación se presenta un resumen rápido de acceso y módulos de la plataforma:
 
-### 1. Dashboard (Inicio)
-Vista general con KPIs nacionales, gráficos de inversión por fuente, ranking de territorios prioritarios y alertas de brechas.
+---
 
-### 2. Mapa
-Visor interactivo con capas de regiones y comunas. Las comunas se colorean según su nivel de prioridad. Al hacer clic se muestra la ficha territorial.
+## 1. Acceso Rápido
+*   **Dirección Web:** `http://localhost:5173`
+*   **Usuarios Demo:**
+    *   **Administrador:** usuario `admin` / contraseña `admin123`
+    *   **Editor:** usuario `editor` / contraseña `editor123`
+    *   **Visor Público:** usuario `viewer` / contraseña `viewer123`
 
-### 3. Mecanismos
-Catálogo de 10 mecanismos financieros UTCUTS. Cada tarjeta muestra fuente, beneficiarios, horizonte temporal y madurez. Clic para ver ficha completa.
+---
 
-### 4. Inversiones
-Tabla de inversiones con filtros. Botón "Nueva Inversión" para registrar datos demo.
+## 2. Resumen de Módulos
+1.  **Dashboard:** KPIs nacionales (inversión total, superficie, tCO2e), gráficos de financiamiento y alertas de calidad.
+2.  **Mapa Interactivo:** Visor cartográfico MapLibre GL con capas regionales y comunas coloreadas según prioridad.
+3.  **Catálogo de Mecanismos:** 10 mecanismos financieros UTCUTS con fichas operativas y alineación NDC.
+4.  **Inversiones:** Tabla detallada de flujos financieros y registro rápido de proyectos.
+5.  **Priorización Territorial:** Panel interactivo de ponderación multicriterio por comuna con cálculo dinámico en tiempo real.
+6.  **MRV:** Monitoreo, reporte y verificación de hectáreas e impacto climático de intervenciones (estimado vs verificado).
+7.  **Brechas:** Semáforos de calidad y completitud de datos (flags de error/crítico).
+8.  **Reportes:** Exportador de datos sintéticos y resúmenes ejecutivos nacionales.
+9.  **Administración (Ingesta):** Panel avanzado para operaciones CRUD (exclusivo para perfiles Editor y Administrador).
 
-### 5. Priorización
-Índice multicriterio configurable. Ajustar pesos con sliders y recalcular. Visualización en gráfico de barras y tabla con clasificación.
-
-### 6. MRV
-Indicadores de monitoreo por categoría. Observaciones con valores estimados vs verificados. Tasa de verificación.
-
-### 7. Brechas
-Semáforos de calidad de datos. Brechas por tipo, severidad y entidad.
-
-### 8. Reportes
-Generación de reportes nacionales, MRV y brechas.
-
-## Nota importante
-
-Todos los datos son **sintéticos (demo)** y no representan información oficial.
+Para obtener instrucciones de administración técnica, carga de nuevas capas GIS y consultas PostGIS de diagnóstico, consulte el **[Manual de Usuario Completo](file:///d:/web_D_anctigravity/sig_utcuts_gwp_chile/docs/MANUAL_USUARIO.md)**.

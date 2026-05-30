@@ -69,15 +69,10 @@ export default function Layout() {
       <main className="flex-1 overflow-y-auto bg-ocean-900">
         {/* Top bar */}
         <header className="sticky top-0 z-10 bg-ocean-900/80 backdrop-blur-xl border-b border-ocean-800/50 px-6 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-white">
-              Plataforma de Inteligencia Territorial UTCUTS
+              SIG de Inversiones e Intervenciones UTCUTS
             </h2>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-ocean-400 bg-ocean-800/50 px-3 py-1 rounded-full">
-                🟢 Demo
-              </span>
-            </div>
           </div>
         </header>
 

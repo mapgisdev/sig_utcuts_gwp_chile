@@ -11,14 +11,14 @@ from app.db.session import engine, SessionLocal
 # Import all models so they register with Base.metadata
 from app.models import user, territory, mechanism, project, investment  # noqa
 from app.models import intervention, mrv, prioritization, data_quality  # noqa
-from app.models import layer, evidence, audit  # noqa
+from app.models import layer, evidence, audit, sirsd_programa, plantacion_forestal_2022  # noqa
 
 # Import routers
 from app.api.v1 import (
     auth, dashboard, territories, layers,
     mechanisms, projects, investments, interventions,
     mrv_router, prioritization_router, data_quality_router,
-    reports, evidence_router,
+    reports, evidence_router, kobo,
 )
 
 
@@ -91,3 +91,4 @@ app.include_router(prioritization_router.router, prefix="/api/v1/prioritization"
 app.include_router(data_quality_router.router, prefix="/api/v1/data-quality", tags=["Calidad de Datos"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reportes"])
 app.include_router(evidence_router.router, prefix="/api/v1/evidence", tags=["Evidencia"])
+app.include_router(kobo.router, prefix="/api/v1/kobo", tags=["Kobo"])

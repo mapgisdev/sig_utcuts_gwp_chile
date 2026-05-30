@@ -71,3 +71,14 @@ def test_geojson_territories():
 def test_layers():
     r = client.get("/api/v1/layers")
     assert r.status_code == 200
+
+
+def test_serve_geojson_layer():
+    # Verify that a real layer file from insumos/datos_geo serves successfully
+    r = client.get("/api/v1/layers/geojson/Concesiones_Acuicultura_geo.json")
+    assert r.status_code == 200
+    
+    # Verify that a non-existent file returns a 404 error
+    r_bad = client.get("/api/v1/layers/geojson/non_existent.json")
+    assert r_bad.status_code == 404
+

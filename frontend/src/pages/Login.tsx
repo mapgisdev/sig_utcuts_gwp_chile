@@ -33,7 +33,9 @@ export default function Login() {
             SIG
           </div>
           <h1 className="text-2xl font-bold text-white">SIG-UTCUTS Chile</h1>
-          <p className="text-ocean-400 text-sm mt-1">Plataforma de Inteligencia Territorial</p>
+          <p className="text-ocean-400 text-sm mt-1">
+            SIG de Inversiones e Intervenciones UTCUTS
+          </p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

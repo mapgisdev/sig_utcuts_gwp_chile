@@ -19,6 +19,28 @@ En base a los archivos cargados, la plataforma cuenta con el siguiente inventari
 | **`concesion_minera_EN_TRAMITE.json`** | Conflicto / Uso de Suelo | Polígonos | Pedimentos y manifestaciones de concesiones mineras en trámite. |
 | **`Concesiones_Acuicultura_geo.json`** | Conflicto / Uso de Suelo | Polígonos | Concesiones de acuicultura vigentes (SUBPESCA / SERNAPESCA). |
 | **`ECMPO_geo.json`** | Gobernanza Social | Polígonos | Espacios Costeros Marinos de Pueblos Originarios (Ley Lafkenche). |
+| **`viveros_forestales.json`** | Intervenciones Forestales | Puntos | Censo oficial de Viveros Forestales 2025 (CONAF), descargado desde la API REST. |
+| **`viveros_inscritos_2024.json`** | Intervenciones Forestales | Puntos | Registro nacional oficial de Viveros Inscritos SAG 2024 (CIREN), descargado desde la API REST. |
+| **`areas_aptas_recuperacion_suelos.json`** | Aptitud de Suelo | Polígonos | Delimitación oficial de Áreas Aptas para Recuperación de Suelos Degradados (CIREN), unificado a nivel nacional. |
+
+---
+
+## 1.1 Servicios OGC (WMS/WFS) de IDE MINAGRI y Sub-instituciones
+
+Además de las capas vectoriales cargadas localmente, la plataforma se integra directamente con la **Infraestructura de Datos Espaciales del Ministerio de Agricultura (IDE MINAGRI)** y sus organismos técnicos (CIREN y CONAF) a través de servicios **WMS (Web Map Service)**.
+
+Estas capas representan datos reales del sector agroforestal e intervenciones en Chile, consumidas de forma dinámica mediante peticiones estandarizadas:
+
+| Capa en el Visor | Institución | URL del Servicio WMS | Capas de Interés (`layers`) | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| **Suelos Agrológicos** | CIREN | `https://esri.ciren.cl/server/services/IDEMINAGRI/SUELOS_AGROLOGICOS/MapServer/WMSServer` | `0` | Clasificación y aptitud agrológica de los suelos chilenos. |
+| **Catastro Frutícola** | CIREN | `https://esri.ciren.cl/server/services/IDEMINAGRI/CATASTRO_FRUTICOLA/MapServer/WMSServer` | `0` | Catastro frutícola nacional de especies por huerto y superficie. |
+| **Incendios Forestales 2024-2025** | CONAF | `https://esri.ciren.cl/server/services/IDEMINAGRI/INCENDIOS/MapServer/WMSServer` | `3` | Registro de áreas e intervenciones afectadas por siniestros en la temporada. |
+| **Recuperación Suelos Degradados** | MINAGRI | `https://esri.ciren.cl/server/services/IDEMINAGRI/PROG_RECUPERACION_SUELOS_DEGRA/MapServer/WMSServer` | `0` | Cobertura espacial del Sistema de Incentivos para la Recuperación de Suelos Degradados (SIRSD). |
+| **Bonificaciones Forestación (DL 701)** | CONAF | `https://esri.ciren.cl/server/services/IDEMINAGRI/BONIFICACIONES_FORESTALES/MapServer/WMSServer` | `0,1,2` | Predios bonificados por forestación y manejo bajo el Decreto Ley 701 y Ley de Bosque Nativo. |
+| **Propiedades Rurales (Maule)** | CIREN | `https://esri.ciren.cl/server/services/IDEMINAGRI/PROPIEDADES_RURALES/MapServer/WMSServer` | `6` | Deslindes y delimitaciones de propiedades agrícolas en la región del Maule. |
+| **Uso de la Tierra (Maule)** | CONAF | `https://esri.ciren.cl/server/services/USOS_DE_LA_TIERRA__CONAF/MapServer/WMSServer` | `16` | Recursos vegetacionales y clasificación del uso de la tierra para Maule. |
+| **Erosión de Suelos** | CIREN | `https://esri.ciren.cl/server/services/IDEMINAGRI/EROSION/MapServer/WMSServer` | `0` | Mapas de niveles y vulnerabilidad a la erosión de suelos. |
 
 ---
 

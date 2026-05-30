@@ -119,22 +119,17 @@ def main():
         prior_tree = STRtree(prior_sites) if prior_sites else None
         
         # B. Protected Areas (Biodiversity)
-        print("\n[Layer 2/5] Loading Protected Areas (SNASPE)...")
+        print("\n[Layer 2/4] Loading Protected Areas (SNASPE)...")
         prot_areas = load_shapes_from_geojson(os.path.join(geo_dir, "Areas_Protegidas.json"))
         prot_tree = STRtree(prot_areas) if prot_areas else None
         
-        # C. Mining Concessions (Degradation / Pressures)
-        print("\n[Layer 3/5] Loading Constituted Mining Concessions...")
-        mining = load_shapes_from_geojson(os.path.join(geo_dir, "concesion_minera_CONSTITUIDA.json"))
-        mining_tree = STRtree(mining) if mining else None
+        # C. Key Ecosystems (Ecosistemas)
+        print("\n[Layer 3/4] Loading Key Terrestrial Ecosystems...")
+        ecosystems = load_shapes_from_geojson(os.path.join(geo_dir, "Ecosistemas_simplified.json"))
+        ecosystems_tree = STRtree(ecosystems) if ecosystems else None
         
-        # D. Aquaculture Concessions (Degradation / Pressures)
-        print("\n[Layer 4/5] Loading Aquaculture Concessions...")
-        aquaculture = load_shapes_from_geojson(os.path.join(geo_dir, "Concesiones_Acuicultura_geo.json"))
-        aquaculture_tree = STRtree(aquaculture) if aquaculture else None
-        
-        # E. Indigenous Spaces ECMPO (Gobernanza)
-        print("\n[Layer 5/5] Loading Indigenous Spaces ECMPO...")
+        # D. Indigenous Spaces ECMPO (Gobernanza)
+        print("\n[Layer 4/4] Loading Indigenous Spaces ECMPO...")
         ecmpo = load_shapes_from_geojson(os.path.join(geo_dir, "ECMPO_geo.json"))
         ecmpo_tree = STRtree(ecmpo) if ecmpo else None
         
@@ -150,8 +145,7 @@ def main():
             # Overlaps
             pct_restoration = calculate_overlap_percentage(c_shape, prior_tree, prior_sites) if prior_tree else 0.0
             pct_biodiversity = calculate_overlap_percentage(c_shape, prot_tree, prot_areas) if prot_tree else 0.0
-            pct_mining = calculate_overlap_percentage(c_shape, mining_tree, mining) if mining_tree else 0.0
-            pct_aquaculture = calculate_overlap_percentage(c_shape, aquaculture_tree, aquaculture) if aquaculture_tree else 0.0
+            pct_ecosystems = calculate_overlap_percentage(c_shape, ecosystems_tree, ecosystems) if ecosystems_tree else 0.0
             pct_ecmpo = calculate_overlap_percentage(c_shape, ecmpo_tree, ecmpo) if ecmpo_tree else 0.0
             
             # Formulate scores (0 to 100 scale)
@@ -161,8 +155,8 @@ def main():
             # B. Biodiversity Score (based on protected area coverage)
             sb = min(pct_biodiversity * 2.0, 100.0)
             
-            # C. Degradation and Environmental Pressures (based on mining & aquaculture overlaps)
-            sd = min((pct_mining + pct_aquaculture) * 4.0, 100.0)
+            # C. Ecosystem Vulnerability Score (based on key ecosystems overlap)
+            sd = min(pct_ecosystems * 2.0, 100.0)
             
             # D. Climate Risk Score (aridity gradient based on region code)
             reg_code = c_code[:2]

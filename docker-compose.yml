@@ -37,6 +37,7 @@ services:
     volumes:
       - ./backend:/app
       - ./data:/data
+      - ./insumos:/insumos
 
   frontend:
     build:

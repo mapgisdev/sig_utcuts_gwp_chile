@@ -1,0 +1,2 @@
+insumos/datos_geo/**/*.json filter=lfs diff=lfs merge=lfs -text
+insumos/datos_geo/*.json filter=lfs diff=lfs merge=lfs -text
